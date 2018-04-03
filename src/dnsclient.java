@@ -18,7 +18,7 @@ public class dnsclient {
 		System.out.println(dominio);
 		
 		
-		
+		 
 		
 		
 		
