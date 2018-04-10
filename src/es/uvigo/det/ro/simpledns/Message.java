@@ -49,6 +49,10 @@ public class Message {
     public Message(String question, RRType type, boolean recursion) {
         this(new DomainName(question), type, recursion);
     }
+    public Message(Message o) {
+        this(o.getQuestion(),o.getQuestionType(), o.getAnswers(),o.getNameServers(),o.getAdditonalRecords(),false);
+    }
+    
 
     /**
      * Constructs a message of the given type

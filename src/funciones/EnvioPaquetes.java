@@ -24,7 +24,7 @@ public class EnvioPaquetes {
 						try {
 							socketUDP = new DatagramSocket();
 						
-						socketUDP.setSoTimeout(35000);
+						socketUDP.setSoTimeout(6000);
 						//pasamos la cadena a bytes
 						byte[] mensaje = consulta.toByteArray();
 					//	System.out.println(mensaje.length);
