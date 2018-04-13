@@ -32,7 +32,7 @@ public class dnsclient {
 		byte ip[] = new byte[4];
 
 		if (ipCachos.length != 4) {
-			System.out.println("Direcion ip DNS in correcta");
+			System.out.println("Direcion ip DNS incorrecta");
 			System.exit(1);
 		}
 		for (int i = 0; i < 4; i++) {
@@ -41,59 +41,63 @@ public class dnsclient {
 			ip[i] = (byte) (b & 0xFF);
 
 		}
-		Inet4Address ServerPregunta = (Inet4Address) InetAddress.getByAddress(ip);
 
 		BufferedReader algo = new BufferedReader(new InputStreamReader(System.in));
 		String entrada;
 
 		while ((entrada = algo.readLine()) != null) {
-
+			System.out.println();
+			Inet4Address ServerPregunta = (Inet4Address) InetAddress.getByAddress(ip);
 			String partes[] = entrada.split("\\s+");
 			if (partes.length != 2) {
 				System.out.println("faltan parametros en la entrada");
 				continue;
 			}
 			partes[0] = partes[0].toUpperCase().trim();
-			if ((partes[0].equals("A") || partes[0].equals("NS"))) {
-				
+			if (partes[0].equals("A") || partes[0].equals("NS")|| partes[0].equals("AAAA")) {
+
 				Message inicial = new Message(partes[1], RRType.valueOf(partes[0]), false);
 				int o = 0;
 				ArrayList<String> dnsConsultados = new ArrayList<>();
-				
-				while (o < 10) {
+
+				while (o < 15) {
 
 					System.out.println("Q " + modoConexion + " "
 							+ ServerPregunta.toString().substring(1, ServerPregunta.toString().length()) + " "
 							+ inicial.getQuestionType() + " " + partes[1]);
 					Message respuesta;
+					int contador = 0;
 					do {
+						contador++;
 						respuesta = EnvioPaquetes.envioUDP(inicial, ServerPregunta);
-					} while (respuesta == null);
-					// System.out.println(respuesta.getQuestion());
-					// System.out.println(respuesta.getAnswers().get(0).getRRType());
+					} while (respuesta == null && contador < 3);
+					if (respuesta == null) {
+						System.out.println("No hay respuesta del servidor consultado");
+						System.exit(1);
+					}
 					if (!(respuesta.getAnswers().isEmpty())) {
-						System.out.println(respuesta.getAnswers().size());
-						if ((respuesta.getAnswers().get(0)) instanceof AResourceRecord) {
-							System.out.println("A "
-									+ ServerPregunta.toString().substring(1, ServerPregunta.toString().length()) + " "
-									+ ((AResourceRecord) (respuesta.getAnswers().get(0))).getAddress().toString()
-											.substring(1, ((AResourceRecord) (respuesta.getAnswers().get(0)))
-													.getAddress().toString().length()));
-						}
-						if ((respuesta.getAnswers().get(0)) instanceof NSResourceRecord) {
-							System.out.println(((NSResourceRecord) (respuesta.getAnswers().get(0))).getNS());
-						}
+
+						
 						if (respuesta.getAnswers().get(0).getRRType().equals(RRType.CNAME)) {
-							System.out.println("La respuesta es un CNAME");
+							System.out.println(
+									"A " + ServerPregunta.toString().substring(1, ServerPregunta.toString().length())
+											+ " CNAME");
+							//	partes[1]=((CNAMEResourceRecord)respuesta.getAnswers().get(0)).getNs().toString();
+							//	ServerPregunta = (Inet4Address) InetAddress.getByAddress(ip);
+							//	System.out.println(partes[1]);
+							//	dnsConsultados = new ArrayList<>();
+							//	continue;
 						}
+						
+						else {
+							answer (respuesta,ServerPregunta);
+						}
+						
 						break;
 					} else if ((!respuesta.getNameServers().isEmpty() && !respuesta.getAdditonalRecords().isEmpty())) {
 						boolean a = false;
 
-						// for (int b = 0; b < respuesta.getNameServers().size(); b++) {
-						// System.out.println(((NSResourceRecord)
-						// (respuesta.getNameServers().get(b))).getNS());
-						// }
+						
 						for (int b = 0; b < respuesta.getNameServers().size(); b++) {
 							for (int i = 0; i < respuesta.getAdditonalRecords().size(); i++) {
 
@@ -104,7 +108,7 @@ public class dnsclient {
 										if (!dnsConsultados
 												.contains(((AResourceRecord) (respuesta.getAdditonalRecords().get(i)))
 														.getAddress().toString())) {
-											
+
 											System.out.println("A "
 													+ ServerPregunta.toString().substring(1,
 															ServerPregunta.toString().length())
@@ -128,28 +132,28 @@ public class dnsclient {
 
 											dnsConsultados.add(ServerPregunta.toString());
 											a = true;
-
 											break;
 										}
 
 									}
 								}
 							}
-							if (a = true)
-								break;
+							if(a==true)break;
 						}
 						if (a == false) {
 							System.out.println("ni puta");
-							System.exit(1);
+							break;
 						}
-					} else {
-						System.out.println("no hay respuesta");
-						System.exit(1);
+					} else if(respuesta.getAdditonalRecords().isEmpty()){
+						System.out.println("El campo additonal está vacio");
+						break;
+					}
+					else {
+						System.out.println("No hay respuesta");
+						break;
 					}
 					o++;
 				}
-
-				// System.out.println(((AResourceRecord)(respuesta.getAdditonalRecords().get(0))).getAddress().toString());
 
 			} else {
 				System.out.println("type no admitido");
@@ -158,6 +162,31 @@ public class dnsclient {
 
 		}
 
+	}
+	public static void answer (Message respuesta,Inet4Address ServerPregunta) {
+		if ((respuesta.getAnswers().get(0)) instanceof AResourceRecord) {
+			System.out.println("A "
+					+ ServerPregunta.toString().substring(1, ServerPregunta.toString().length()) + " "
+					+ ((AResourceRecord) (respuesta.getAnswers().get(0))).getAddress().toString()
+							.substring(1, ((AResourceRecord) (respuesta.getAnswers().get(0)))
+									.getAddress().toString().length()));
+		}
+		if ((respuesta.getAnswers().get(0)) instanceof NSResourceRecord) {
+			System.out.println(((NSResourceRecord) (respuesta.getAnswers().get(0))).getNS());
+			System.out.println("A "
+					+ ServerPregunta.toString().substring(1, ServerPregunta.toString().length()) + " "
+					+ ((NSResourceRecord) (respuesta.getAnswers().get(0))).getNS().toString()
+							.substring(1, (((NSResourceRecord) (respuesta.getAnswers().get(0))).getNS()
+									.toString().length())));
+		}
+		
+		if ((respuesta.getAnswers().get(0)) instanceof AAAAResourceRecord) {
+			System.out.println("A "
+					+ ServerPregunta.toString().substring(1, ServerPregunta.toString().length()) + " "
+					+ ((AAAAResourceRecord) (respuesta.getAnswers().get(0))).getAddress().toString()
+							.substring(1, ((AAAAResourceRecord) (respuesta.getAnswers().get(0)))
+									.getAddress().toString().length()));
+		}
 	}
 
 }

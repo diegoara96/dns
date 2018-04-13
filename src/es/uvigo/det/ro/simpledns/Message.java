@@ -183,6 +183,11 @@ public class Message {
     public DomainName getQuestion() {
         return question;
     }
+    
+    public void setQuestion(DomainName question) {
+        this.question=question;
+    	return ;
+    }
 
     /**
      * @return the questionType
@@ -260,7 +265,7 @@ public class Message {
         public boolean getQR() {
             return QR > 0;
         }
-
+        
         /**
          * @param QR the QR to set
          */
