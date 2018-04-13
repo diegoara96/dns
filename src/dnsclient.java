@@ -172,7 +172,7 @@ public class dnsclient {
 									.getAddress().toString().length()));
 		}
 		if ((respuesta.getAnswers().get(0)) instanceof NSResourceRecord) {
-			System.out.println(((NSResourceRecord) (respuesta.getAnswers().get(0))).getNS());
+			
 			System.out.println("A "
 					+ ServerPregunta.toString().substring(1, ServerPregunta.toString().length()) + " "
 					+ ((NSResourceRecord) (respuesta.getAnswers().get(0))).getNS().toString()
