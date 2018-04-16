@@ -27,7 +27,6 @@ public class EnvioPaquetes {
 						socketUDP.setSoTimeout(6000);
 						//pasamos la cadena a bytes
 						byte[] mensaje = consulta.toByteArray();
-					//	System.out.println(mensaje.length);
 						//sacamos la ip del nombre del servidor
 						InetAddress servidor = direccion_ip;
 
