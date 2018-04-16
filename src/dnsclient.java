@@ -7,6 +7,15 @@ import java.util.ArrayList;
 import es.uvigo.det.ro.simpledns.*;
 import funciones.EnvioPaquetes;
 
+
+
+//alguna veces sale antes el bucle y otras consulta a la ip revisad condiciones salida por si se puede hacer con rtype
+// probar con www.farodevigo.com y pornhub.com
+
+
+
+
+
 public class dnsclient {
 
 	public static void main(String[] args) throws Exception {
@@ -44,7 +53,7 @@ public class dnsclient {
 		BufferedReader algo = new BufferedReader(new InputStreamReader(System.in));
 		String entrada;
 
-		while ((entrada = algo.readLine()) != null) {
+	siguiente:	while ((entrada = algo.readLine()) != null) {
 			System.out.println();
 			Inet4Address ServerPregunta = (Inet4Address) InetAddress.getByAddress(ip);
 			Inet4Address ipOriginal = (Inet4Address) InetAddress.getByAddress(ip);
@@ -54,13 +63,13 @@ public class dnsclient {
 				continue;
 			}
 			partes[0] = partes[0].toUpperCase().trim();
-			if (partes[0].equals("A") || partes[0].equals("NS")|| partes[0].equals("AAAA")) {
+			if (partes[0].equals("A") || partes[0].equals("NS") || partes[0].equals("AAAA")) {
 
 				Message inicial = new Message(partes[1], RRType.valueOf(partes[0]), false);
 				int o = 0;
 				ArrayList<String> dnsConsultados = new ArrayList<>();
 
-				bucle:	while (o < 7) {
+				bucle: while (o < 7) {
 
 					System.out.println("Q " + modoConexion + " "
 							+ ServerPregunta.toString().substring(1, ServerPregunta.toString().length()) + " "
@@ -73,31 +82,32 @@ public class dnsclient {
 					} while (respuesta == null && contador < 3);
 					if (respuesta == null) {
 						System.out.println("No hay respuesta del servidor consultado");
-						System.exit(1);
+						continue siguiente;
 					}
-					
+
 					if (!(respuesta.getAnswers().isEmpty())) {
 
-						
 						if (respuesta.getAnswers().get(0).getRRType().equals(RRType.CNAME)) {
 							System.out.println(
 									"A " + ServerPregunta.toString().substring(1, ServerPregunta.toString().length())
 											+ " CNAME");
-								DomainName consulta=((CNAMEResourceRecord)respuesta.getAnswers().get(0)).getNs();
-								ServerPregunta=noDNS(consulta, ipOriginal, RRType.A, dnsConsultados);
-								continue;
-							//break;
+							DomainName consulta = ((CNAMEResourceRecord) respuesta.getAnswers().get(0)).getNs();
+							ServerPregunta = noDNS(consulta, ipOriginal, RRType.A, dnsConsultados);
+							if (ServerPregunta == null) {
+								System.out.println("El campo additonal está vacio");
+								continue siguiente;
+							}
+							
 						}
-						
+
 						else {
-							answer (respuesta,ServerPregunta);
+							answer(respuesta, ServerPregunta);
 						}
-						
+
 						break;
 					} else if ((!respuesta.getNameServers().isEmpty() && !respuesta.getAdditonalRecords().isEmpty())) {
 						boolean a = false;
-						
-						
+
 						for (int b = 0; b < respuesta.getNameServers().size(); b++) {
 							for (int i = 0; i < respuesta.getAdditonalRecords().size(); i++) {
 
@@ -129,43 +139,43 @@ public class dnsclient {
 																					.length()));
 											ServerPregunta = ((AResourceRecord) (respuesta.getAdditonalRecords()
 													.get(i))).getAddress();
-											
+
 											dnsConsultados.add(ServerPregunta.toString());
 											a = true;
 											continue bucle;
 										}
-						
+
 									}
 								}
 							}
-							if(a==true)break;
+							if (a == true)
+								break;
 						}
 						if (a == false) {
 							System.out.println("ni puta");
 							break;
 						}
-					} else if(respuesta.getAdditonalRecords().isEmpty()&&!respuesta.getNameServers().isEmpty()){
-						// cambiar respeusta de tipo mensaje a tipo domain o string para poder usarlo tanto en cname como 
-						//para la recursividad 
+					} else if (respuesta.getAdditonalRecords().isEmpty() && !respuesta.getNameServers().isEmpty()) {
+						// cambiar respeusta de tipo mensaje a tipo domain o string para poder usarlo
+						// tanto en cname como
+						// para la recursividad
 						System.out.println("El campo additonal está vacio");
-						DomainName consulta = ((NSResourceRecord)respuesta.getNameServers().get(0)).getNS();
-						RRType tipo= RRType.A;
-						
-					ServerPregunta=	noDNS(consulta, ipOriginal,tipo,dnsConsultados);
-					
-					if(ServerPregunta==null) {
-						System.out.println("El campo additonal está vacio");
-						System.exit(1);
-					}
-					dnsConsultados.add(ServerPregunta.toString());
-					o++;
-					System.out.println("sale");
-					continue;
-					//	break;
-						
-						
-					}
-					else {
+						DomainName consulta = ((NSResourceRecord) respuesta.getNameServers().get(0)).getNS();
+						RRType tipo = RRType.A;
+						System.out.println("entra por no addtional");
+						ServerPregunta = noDNS(consulta, ipOriginal, tipo, dnsConsultados);
+
+						if (ServerPregunta == null) {
+							System.out.println("El campo additonal está vacio");
+							continue siguiente;
+						}
+						dnsConsultados.add(ServerPregunta.toString());
+						o++;
+						System.out.println("sale");
+						continue siguiente;
+						// break;
+
+					} else {
 						System.out.println("No hay respuesta");
 						break;
 					}
@@ -180,142 +190,131 @@ public class dnsclient {
 		}
 
 	}
-	public static void answer (Message respuesta,Inet4Address ServerPregunta) {
+
+	public static void answer(Message respuesta, Inet4Address ServerPregunta) {
 		if ((respuesta.getAnswers().get(0)) instanceof AResourceRecord) {
-			System.out.println("A "
-					+ ServerPregunta.toString().substring(1, ServerPregunta.toString().length()) + " "
-					+ ((AResourceRecord) (respuesta.getAnswers().get(0))).getAddress().toString()
-							.substring(1, ((AResourceRecord) (respuesta.getAnswers().get(0)))
-									.getAddress().toString().length()));
+			System.out.println("A " + ServerPregunta.toString().substring(1, ServerPregunta.toString().length()) + " "
+					+ ((AResourceRecord) (respuesta.getAnswers().get(0))).getAddress().toString().substring(1,
+							((AResourceRecord) (respuesta.getAnswers().get(0))).getAddress().toString().length()));
 		}
 		if ((respuesta.getAnswers().get(0)) instanceof NSResourceRecord) {
-			for(int i=0;i<respuesta.getAnswers().size();i++) {
-				
-			
-			System.out.println("A "
-					+ ServerPregunta.toString().substring(1, ServerPregunta.toString().length()) + " "
-					+ ((NSResourceRecord) (respuesta.getAnswers().get(i))).getNS().toString()
-							.substring(1, (((NSResourceRecord) (respuesta.getAnswers().get(i))).getNS()
-									.toString().length())));
-		}
+			for (int i = 0; i < respuesta.getAnswers().size(); i++) {
+
+				System.out.println("A " + ServerPregunta.toString().substring(1, ServerPregunta.toString().length())
+						+ " " + ((NSResourceRecord) (respuesta.getAnswers().get(i))).getNS().toString().substring(1,
+								(((NSResourceRecord) (respuesta.getAnswers().get(i))).getNS().toString().length())));
 			}
-		
+		}
+
 		if ((respuesta.getAnswers().get(0)) instanceof AAAAResourceRecord) {
-			System.out.println("A "
-					+ ServerPregunta.toString().substring(1, ServerPregunta.toString().length()) + " "
-					+ ((AAAAResourceRecord) (respuesta.getAnswers().get(0))).getAddress().toString()
-							.substring(1, ((AAAAResourceRecord) (respuesta.getAnswers().get(0)))
-									.getAddress().toString().length()));
+			System.out.println("A " + ServerPregunta.toString().substring(1, ServerPregunta.toString().length()) + " "
+					+ ((AAAAResourceRecord) (respuesta.getAnswers().get(0))).getAddress().toString().substring(1,
+							((AAAAResourceRecord) (respuesta.getAnswers().get(0))).getAddress().toString().length()));
 		}
 	}
-	
-	
-	
-	
-	
-	
-	
-	public static Inet4Address noDNS(DomainName consulta,Inet4Address ipOriginal,RRType tipo,ArrayList<String> dnsString) {
-		int contador=0;
-		Message respuesta=null;
+
+	public static Inet4Address noDNS(DomainName consulta, Inet4Address ipOriginal, RRType tipo,
+			ArrayList<String> dnsString) {
+		int contador = 0;
+		Message respuesta = null;
 		Message dns = new Message(consulta, RRType.A, false);
 		Inet4Address ServerPregunta = ipOriginal;
-		Inet4Address ip=null;
-		String modoConexion="UDP";
+		Inet4Address ip = null;
+		String modoConexion = "UDP";
 		ArrayList<String> dnsConsultados = new ArrayList<>();
-		for(int o=0;o<7;o++) {
+siguiente:		for (int o = 0; o < 7; o++) {
 
 			System.out.println("Q " + modoConexion + " "
-					+ ServerPregunta.toString().substring(1, ServerPregunta.toString().length()) + " "
-					+ tipo + " " + consulta.toString());
-		do {
-			
-			contador++;
-			respuesta = EnvioPaquetes.envioUDP(dns, ServerPregunta);
-		} while (respuesta == null && contador < 3);
-		if (respuesta == null) {
-			System.out.println("No hay respuesta del servidor consultado");
-			System.exit(1);
-		}
-		
-		
-		if (!(respuesta.getAnswers().isEmpty())) {
-				answer(respuesta, ipOriginal);
-				ip = ((AResourceRecord) (respuesta.getAnswers()
-						.get(0))).getAddress();
-				
-				return ip;
+					+ ServerPregunta.toString().substring(1, ServerPregunta.toString().length()) + " " + tipo + " "
+					+ consulta.toString());
+			do {
+
+				contador++;
+				respuesta = EnvioPaquetes.envioUDP(dns, ServerPregunta);
+			} while (respuesta == null && contador < 3);
+			if (respuesta == null) {
+				System.out.println("No hay respuesta del servidor consultado");
+				System.exit(1);
 			}
-		
-			else if ((!respuesta.getNameServers().isEmpty() && !respuesta.getAdditonalRecords().isEmpty())) {
-		boolean a = false;
-		
-	bucle:	for (int b = 0; b < respuesta.getNameServers().size(); b++) {
-			for (int i = 0; i < respuesta.getAdditonalRecords().size(); i++) {
-				if (((respuesta.getAdditonalRecords().get(i))) instanceof AResourceRecord) {
-					if (((NSResourceRecord) respuesta.getNameServers().get(b)).getNS().toString()
-							.equals(((AResourceRecord) respuesta.getAdditonalRecords().get(i))
-									.getDomain().toString())) {
-						if (!dnsConsultados
-								.contains(((AResourceRecord) (respuesta.getAdditonalRecords().get(i)))
-										.getAddress().toString())) {
-							
-							
-							System.out.println("A "
-									+ ServerPregunta.toString().substring(1,
-											ServerPregunta.toString().length())
-									+ " " + respuesta.getNameServers().get(b).getRRType() + " "
-									+ respuesta.getNameServers().get(b).getTTL() + " "
-									+ ((NSResourceRecord) (respuesta.getNameServers().get(b))).getNS());
-							System.out.println("A "
-									+ ServerPregunta.toString().substring(1,
-											ServerPregunta.toString().length())
 
-									+ " " + respuesta.getAdditonalRecords().get(i).getRRType() + " "
-
-									+ respuesta.getNameServers().get(b).getTTL() + " "
-									+ ((AResourceRecord) (respuesta.getAdditonalRecords().get(i)))
-											.getAddress().toString().substring(1,
-													((AResourceRecord) (respuesta.getAdditonalRecords()
-															.get(i))).getAddress().toString()
-																	.length()));
-							ServerPregunta = ((AResourceRecord) (respuesta.getAdditonalRecords()
-									.get(i))).getAddress();
-							System.out.println("por aqui anda");
-							dnsConsultados.add(ServerPregunta.toString());
-							ip= ServerPregunta;
-							a=true;
-							break bucle;
-						}
-
+			if (!(respuesta.getAnswers().isEmpty())) {
+				if (respuesta.getAnswers().get(0).getRRType().equals(RRType.CNAME)) {
+					System.out.println(
+							"A " + ServerPregunta.toString().substring(1, ServerPregunta.toString().length())
+									+ " CNAME");
+					DomainName consultas = ((CNAMEResourceRecord) respuesta.getAnswers().get(0)).getNs();
+					ServerPregunta = noDNS(consultas, ipOriginal, RRType.A, dnsConsultados);
+					if (ServerPregunta == null) {
+						System.out.println("El campo additonal está vacio");
+						continue siguiente;
 					}
+					
+					// break;
+				}else {
+				answer(respuesta, ipOriginal);
+				ip = ((AResourceRecord) (respuesta.getAnswers().get(0))).getAddress();
+				System.out.println("aqui");
+				return ip;
+			}}
+
+			else if ((!respuesta.getNameServers().isEmpty() && !respuesta.getAdditonalRecords().isEmpty())) {
+				boolean a = false;
+
+				bucle: for (int b = 0; b < respuesta.getNameServers().size(); b++) {
+					for (int i = 0; i < respuesta.getAdditonalRecords().size(); i++) {
+						if (((respuesta.getAdditonalRecords().get(i))) instanceof AResourceRecord) {
+							if (((NSResourceRecord) respuesta.getNameServers().get(b)).getNS().toString()
+									.equals(((AResourceRecord) respuesta.getAdditonalRecords().get(i)).getDomain()
+											.toString())) {
+								if (!dnsConsultados
+										.contains(((AResourceRecord) (respuesta.getAdditonalRecords().get(i)))
+												.getAddress().toString())) {
+
+									System.out.println("A "
+											+ ServerPregunta.toString().substring(1, ServerPregunta.toString().length())
+											+ " " + respuesta.getNameServers().get(b).getRRType() + " "
+											+ respuesta.getNameServers().get(b).getTTL() + " "
+											+ ((NSResourceRecord) (respuesta.getNameServers().get(b))).getNS());
+									System.out.println("A "
+											+ ServerPregunta.toString().substring(1, ServerPregunta.toString().length())
+
+											+ " " + respuesta.getAdditonalRecords().get(i).getRRType() + " "
+
+											+ respuesta.getNameServers().get(b).getTTL() + " "
+											+ ((AResourceRecord) (respuesta.getAdditonalRecords().get(i))).getAddress()
+													.toString().substring(1,
+															((AResourceRecord) (respuesta.getAdditonalRecords().get(i)))
+																	.getAddress().toString().length()));
+									ServerPregunta = ((AResourceRecord) (respuesta.getAdditonalRecords().get(i)))
+											.getAddress();
+									
+									dnsConsultados.add(ServerPregunta.toString());
+									ip = ServerPregunta;
+									a = true;
+									break bucle;
+								}
+
+							}
+						}
+					}
+					// if(a==true)break;
+				}
+				if (a == false) {
+					System.out.println("ni puta");
+					break;
 				}
 			}
-		//	if(a==true)break;
+
+			else if (respuesta.getAdditonalRecords().isEmpty()) {
+				System.out.println("entra por aditional");
+			ServerPregunta=	noDNS(((NSResourceRecord)respuesta.getNameServers().get(0)).getNS(), ipOriginal, tipo, dnsString);
+				continue;
+			}
+			
 		}
-		if (a == false) {
-			System.out.println("ni puta");
-			break;
-		}
-	}
-		
-	 else if(respuesta.getAdditonalRecords().isEmpty()){
-		System.out.println("jooooder");
+
 		return null;
-	 }
-	//	o++;
-		}	
-		
-		
-	return null;
-	
+
 	}
-	
-	
-	
-	
-	
-	
-	
-	
+
 }
