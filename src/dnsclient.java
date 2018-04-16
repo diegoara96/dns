@@ -60,7 +60,7 @@ public class dnsclient {
 				int o = 0;
 				ArrayList<String> dnsConsultados = new ArrayList<>();
 
-				while (o < 7) {
+				bucle:	while (o < 7) {
 
 					System.out.println("Q " + modoConexion + " "
 							+ ServerPregunta.toString().substring(1, ServerPregunta.toString().length()) + " "
@@ -75,6 +75,7 @@ public class dnsclient {
 						System.out.println("No hay respuesta del servidor consultado");
 						System.exit(1);
 					}
+					
 					if (!(respuesta.getAnswers().isEmpty())) {
 
 						
@@ -82,10 +83,10 @@ public class dnsclient {
 							System.out.println(
 									"A " + ServerPregunta.toString().substring(1, ServerPregunta.toString().length())
 											+ " CNAME");
-						//		DomainName consulta=((CNAMEResourceRecord)respuesta.getAnswers().get(0)).getNs();
-							//	ServerPregunta=noDNS(consulta, ipOriginal, RRType.A, dnsConsultados);
-								//continue;
-							break;
+								DomainName consulta=((CNAMEResourceRecord)respuesta.getAnswers().get(0)).getNs();
+								ServerPregunta=noDNS(consulta, ipOriginal, RRType.A, dnsConsultados);
+								continue;
+							//break;
 						}
 						
 						else {
@@ -97,7 +98,7 @@ public class dnsclient {
 						boolean a = false;
 						
 						
-			bucle:			for (int b = 0; b < respuesta.getNameServers().size(); b++) {
+						for (int b = 0; b < respuesta.getNameServers().size(); b++) {
 							for (int i = 0; i < respuesta.getAdditonalRecords().size(); i++) {
 
 								if (((respuesta.getAdditonalRecords().get(i))) instanceof AResourceRecord) {
@@ -131,7 +132,7 @@ public class dnsclient {
 											
 											dnsConsultados.add(ServerPregunta.toString());
 											a = true;
-											break bucle;
+											continue bucle;
 										}
 						
 									}
@@ -230,7 +231,7 @@ public class dnsclient {
 		do {
 			
 			contador++;
-			respuesta = EnvioPaquetes.envioUDP(dns, ipOriginal);
+			respuesta = EnvioPaquetes.envioUDP(dns, ServerPregunta);
 		} while (respuesta == null && contador < 3);
 		if (respuesta == null) {
 			System.out.println("No hay respuesta del servidor consultado");
@@ -248,22 +249,8 @@ public class dnsclient {
 		
 			else if ((!respuesta.getNameServers().isEmpty() && !respuesta.getAdditonalRecords().isEmpty())) {
 		boolean a = false;
-		for (int b = 0; b < respuesta.getNameServers().size(); b++) {
-			System.out.println("A "
-					+ ServerPregunta.toString().substring(1,
-							ServerPregunta.toString().length())
-					+ " " + respuesta.getNameServers().get(b).getRRType() + " "
-					+ respuesta.getNameServers().get(b).getTTL() + " "
-					+ ((NSResourceRecord) (respuesta.getNameServers().get(b))).getNS());
-		}
 		
 	bucle:	for (int b = 0; b < respuesta.getNameServers().size(); b++) {
-		System.out.println("A "
-				+ ServerPregunta.toString().substring(1,
-						ServerPregunta.toString().length())
-				+ " " + respuesta.getNameServers().get(b).getRRType() + " "
-				+ respuesta.getNameServers().get(b).getTTL() + " "
-				+ ((NSResourceRecord) (respuesta.getNameServers().get(b))).getNS());
 			for (int i = 0; i < respuesta.getAdditonalRecords().size(); i++) {
 				if (((respuesta.getAdditonalRecords().get(i))) instanceof AResourceRecord) {
 					if (((NSResourceRecord) respuesta.getNameServers().get(b)).getNS().toString()
