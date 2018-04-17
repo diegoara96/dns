@@ -92,7 +92,7 @@ public class dnsclient {
 									"A " + ServerPregunta.toString().substring(1, ServerPregunta.toString().length())
 											+ " CNAME");
 							DomainName consulta = ((CNAMEResourceRecord) respuesta.getAnswers().get(0)).getNs();
-							ServerPregunta = noDNS(consulta, ipOriginal, RRType.A, dnsConsultados);
+							ServerPregunta = noDNS(consulta, ipOriginal, RRType.valueOf(partes[0]), dnsConsultados);
 							if (ServerPregunta == null) {
 								System.out.println("El campo additonal está vacio");
 								continue siguiente;
@@ -217,11 +217,22 @@ public class dnsclient {
 			ArrayList<String> dnsString) {
 		int contador = 0;
 		Message respuesta = null;
-		Message dns = new Message(consulta, RRType.A, false);
+		Message dns = new Message(consulta, tipo, false);
 		Inet4Address ServerPregunta = ipOriginal;
 		Inet4Address ip = null;
 		String modoConexion = "UDP";
 		ArrayList<String> dnsConsultados = new ArrayList<>();
+		
+		//en caso de que entre con tipo cname hay que resolver la direccion a/aaaa
+		// si entra por no saber la direccion de un ns hay que hacer consulta a/aaa
+		// en caso de entrar como ns solo hay que sacar los autiritos no resolverlos
+		
+		
+		
+		
+		
+		
+		
 siguiente:		for (int o = 0; o < 7; o++) {
 
 			System.out.println("Q " + modoConexion + " "
@@ -243,7 +254,7 @@ siguiente:		for (int o = 0; o < 7; o++) {
 							"A " + ServerPregunta.toString().substring(1, ServerPregunta.toString().length())
 									+ " CNAME");
 					DomainName consultas = ((CNAMEResourceRecord) respuesta.getAnswers().get(0)).getNs();
-					ServerPregunta = noDNS(consultas, ipOriginal, RRType.A, dnsConsultados);
+					ServerPregunta = noDNS(consultas, ipOriginal, tipo, dnsConsultados);
 					if (ServerPregunta == null) {
 						System.out.println("El campo additonal está vacio");
 						continue siguiente;

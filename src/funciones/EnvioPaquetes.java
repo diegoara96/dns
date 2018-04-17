@@ -12,7 +12,7 @@ import es.uvigo.det.ro.simpledns.*;
 public class EnvioPaquetes {
 
 	
-	
+	//if con cname o dns
 	
 	public static Message envioUDP(Message consulta,Inet4Address direccion_ip)  {
 		
@@ -24,7 +24,7 @@ public class EnvioPaquetes {
 						try {
 							socketUDP = new DatagramSocket();
 						
-						socketUDP.setSoTimeout(6000);
+						socketUDP.setSoTimeout(4000);
 						//pasamos la cadena a bytes
 						byte[] mensaje = consulta.toByteArray();
 						//sacamos la ip del nombre del servidor
