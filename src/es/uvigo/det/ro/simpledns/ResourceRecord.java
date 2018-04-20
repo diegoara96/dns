@@ -48,6 +48,8 @@ public class ResourceRecord {
                 return new NSResourceRecord(temp, message);
             case CNAME:
             	return new CNAMEResourceRecord(temp, message);
+            case MX:
+            	return new MXResourceRecord(temp, message);
             default:
                 return temp;
         }

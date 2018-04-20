@@ -38,13 +38,13 @@ public class EnvioPaquetes {
 		Message respuesta = null;
 		try {
 			socketUDP = new DatagramSocket();
-
+			
 			socketUDP.setSoTimeout(4000);
 			// pasamos la cadena a bytes
 			byte[] mensaje = consulta.toByteArray();
 			// sacamos la ip del nombre del servidor
 			InetAddress servidor = direccion_ip;
-
+			
 			// creamos el datagrama con los elemntos introducidos
 			DatagramPacket peticionServidor = new DatagramPacket(mensaje, mensaje.length, servidor, puerto);
 
@@ -55,7 +55,7 @@ public class EnvioPaquetes {
 			byte[] almacen = new byte[1000];
 
 			DatagramPacket respuestaServidor = new DatagramPacket(almacen, almacen.length);
-
+			
 			try {
 				// recivimos el paquete, en caso de que el tiempo de espera exceda el time out
 				// sacamos excepcion y cerramos socket

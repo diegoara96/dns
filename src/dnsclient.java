@@ -4,9 +4,6 @@ import java.io.InputStreamReader;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.util.ArrayList;
-
-import javax.rmi.CORBA.Util;
-
 import es.uvigo.det.ro.simpledns.*;
 import funciones.EnvioPaquetes;
 
@@ -38,7 +35,7 @@ public class dnsclient {
 			ip[i] = (byte) (b & 0xFF);
 
 		}
-
+		
 		BufferedReader algo = new BufferedReader(new InputStreamReader(System.in));
 		String entrada;
 
@@ -60,7 +57,7 @@ public class dnsclient {
 			}
 
 			partes[0] = partes[0].toUpperCase().trim();
-			if (partes[0].equals("A") || partes[0].equals("NS") || partes[0].equals("AAAA")) {
+			if (partes[0].equals("A") || partes[0].equals("NS") || partes[0].equals("AAAA")|| partes[0].equals("MX")) {
 
 				Message inicial = new Message(partes[1], RRType.valueOf(partes[0]), false);
 				int o = 0;
@@ -68,7 +65,7 @@ public class dnsclient {
 				EnvioPaquetes.envioTCP(inicial, ipOriginal);
 				// se limita las consultas a 7 por defecto
 				bucle: while (o < 7) {
-
+		
 					System.out.println("Q " + modoConexion + " "
 							+ ServerPregunta.toString().substring(1, ServerPregunta.toString().length()) + " "
 							+ inicial.getQuestionType() + " " + partes[1]);
@@ -212,6 +209,13 @@ public class dnsclient {
 					+ respuesta.getAnswers().get(0).getTTL() + " "
 					+ ((AAAAResourceRecord) (respuesta.getAnswers().get(0))).getAddress().toString().substring(1,
 							((AAAAResourceRecord) (respuesta.getAnswers().get(0))).getAddress().toString().length()));
+		}
+		if ((respuesta.getAnswers().get(0)) instanceof MXResourceRecord) {
+			for (int i = 0; i < respuesta.getAnswers().size(); i++) {
+				System.out.println("A " + ServerPregunta.toString().substring(1, ServerPregunta.toString().length())
+						+ " " + respuesta.getAnswers().get(i).getTTL() + " "
+						+ ((MXResourceRecord) (respuesta.getAnswers().get(i))).getNS().toString());
+			}
 		}
 	}
 
