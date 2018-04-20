@@ -20,7 +20,7 @@ package es.uvigo.det.ro.simpledns;
  *
  * @author Miguel Rodriguez Perez <miguel@det.uvigo.gal>
  */
-class Utils {
+public class Utils {
 
     public static byte[] int16toByteArray(int i) {
         byte[] output = new byte[2];

@@ -4,6 +4,9 @@ import java.io.InputStreamReader;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.util.ArrayList;
+
+import javax.rmi.CORBA.Util;
+
 import es.uvigo.det.ro.simpledns.*;
 import funciones.EnvioPaquetes;
 
@@ -62,13 +65,14 @@ public class dnsclient {
 				System.out.println("faltan parametros en la entrada");
 				continue;
 			}
+			
 			partes[0] = partes[0].toUpperCase().trim();
 			if (partes[0].equals("A") || partes[0].equals("NS") || partes[0].equals("AAAA")) {
 
 				Message inicial = new Message(partes[1], RRType.valueOf(partes[0]), false);
 				int o = 0;
 				ArrayList<String> dnsConsultados = new ArrayList<>();
-
+			//	EnvioPaquetes.envioTCP(inicial, ipOriginal);
 				bucle: while (o < 7) {
 
 					System.out.println("Q " + modoConexion + " "
@@ -106,7 +110,7 @@ public class dnsclient {
 
 						break;
 					} 
-					else if(respuesta.getNameServers().get(0).getRRType().equals(RRType.SOA)) {
+					else if(!respuesta.getNameServers().isEmpty()&&respuesta.getNameServers().get(0).getRRType().equals(RRType.SOA)) {
 						System.out.println("La respuesta es de tipo SOA");
 						break bucle;
 					}else if ((!respuesta.getNameServers().isEmpty() && !respuesta.getAdditonalRecords().isEmpty())) {
@@ -280,7 +284,7 @@ siguiente:		for (int o = 0; o < 7; o++) {
 				}
 				return null;
 			}}
-			else if(!respuesta.getAnswers().isEmpty()&&respuesta.getNameServers().get(0).getRRType().equals(RRType.SOA)) {
+			else if(!respuesta.getAnswers().isEmpty()&&!respuesta.getNameServers().isEmpty()&&respuesta.getNameServers().get(0).getRRType().equals(RRType.SOA)) {
 				System.out.println("La respuesta es de tipo SOA");
 				return null;
 			}
