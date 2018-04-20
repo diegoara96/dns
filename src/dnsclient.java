@@ -57,7 +57,7 @@ public class dnsclient {
 			}
 
 			partes[0] = partes[0].toUpperCase().trim();
-			if (partes[0].equals("A") || partes[0].equals("NS") || partes[0].equals("AAAA") || partes[0].equals("MX")) {
+			if (partes[0].equals("A") || partes[0].equals("NS") || partes[0].equals("AAAA") || partes[0].equals("MX")|| partes[0].equals("CNAME")) {
 
 				Message inicial = new Message(partes[1], RRType.valueOf(partes[0]), false);
 				int o = 0;
@@ -82,7 +82,7 @@ public class dnsclient {
 
 					if (!(respuesta.getAnswers().isEmpty())) {
 
-						if (respuesta.getAnswers().get(0).getRRType().equals(RRType.CNAME)) {
+						if (respuesta.getAnswers().get(0).getRRType().equals(RRType.CNAME)&&!RRType.valueOf(partes[0]).equals(RRType.CNAME)) {
 
 							DomainName consulta = ((CNAMEResourceRecord) respuesta.getAnswers().get(0)).getNs();
 							System.out.println(
@@ -217,7 +217,13 @@ public class dnsclient {
 						+ ((MXResourceRecord) (respuesta.getAnswers().get(i))).getNS().toString());
 			}
 		}
-	}
+		
+		if((respuesta.getAnswers().get(0)) instanceof CNAMEResourceRecord) {
+			
+		System.out.println(
+				"A " + ServerPregunta.toString().substring(1, ServerPregunta.toString().length())
+						+ " CNAME" + " " + ((CNAMEResourceRecord) respuesta.getAnswers().get(0)).getNs().toString());
+	}}
 
 	public static Inet4Address noDNS(DomainName consulta, Inet4Address ipOriginal, RRType tipo,
 			ArrayList<String> dnsString) {
