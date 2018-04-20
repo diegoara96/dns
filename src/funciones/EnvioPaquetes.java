@@ -120,7 +120,8 @@ public class EnvioPaquetes {
 			socketCliente.close();
 
 		} catch (ConnectException e) {
-			System.out.println("Datos de conexion erroneos");
+			
+			System.out.println("El servidor rechaza TCP");
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

@@ -15,11 +15,11 @@ public class dnsclient {
 		if (args.length != 2) {
 			System.out.println("numero de argumentos incorrecto");
 		}
-		args[0] = args[0].toLowerCase();
-		System.out.println(args[0]);
+
 		args[0] = args[0].toLowerCase();
 		if (!(args[0].equals("-t") || args[0].equals("-u"))) {
 			System.out.println("modo de conexion distinto de -(t|u)");
+			System.exit(1);
 		}
 
 		String ipCachos[] = args[1].split("\\.");
@@ -35,7 +35,7 @@ public class dnsclient {
 			ip[i] = (byte) (b & 0xFF);
 
 		}
-		
+
 		BufferedReader algo = new BufferedReader(new InputStreamReader(System.in));
 		String entrada;
 
@@ -57,7 +57,7 @@ public class dnsclient {
 			}
 
 			partes[0] = partes[0].toUpperCase().trim();
-			if (partes[0].equals("A") || partes[0].equals("NS") || partes[0].equals("AAAA")|| partes[0].equals("MX")) {
+			if (partes[0].equals("A") || partes[0].equals("NS") || partes[0].equals("AAAA") || partes[0].equals("MX")) {
 
 				Message inicial = new Message(partes[1], RRType.valueOf(partes[0]), false);
 				int o = 0;
@@ -65,7 +65,7 @@ public class dnsclient {
 				EnvioPaquetes.envioTCP(inicial, ipOriginal);
 				// se limita las consultas a 7 por defecto
 				bucle: while (o < 7) {
-		
+
 					System.out.println("Q " + modoConexion + " "
 							+ ServerPregunta.toString().substring(1, ServerPregunta.toString().length()) + " "
 							+ inicial.getQuestionType() + " " + partes[1]);
