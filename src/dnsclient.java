@@ -12,13 +12,6 @@ import funciones.EnvioPaquetes;
 
 
 
-//alguna veces sale antes el bucle y otras consulta a la ip revisad condiciones salida por si se puede hacer con rtype
-// probar con www.farodevigo.com y pornhub.com
-
-
-
-
-
 public class dnsclient {
 
 	public static void main(String[] args) throws Exception {
@@ -72,7 +65,7 @@ public class dnsclient {
 				Message inicial = new Message(partes[1], RRType.valueOf(partes[0]), false);
 				int o = 0;
 				ArrayList<String> dnsConsultados = new ArrayList<>();
-			//	EnvioPaquetes.envioTCP(inicial, ipOriginal);
+				EnvioPaquetes.envioTCP(inicial, ipOriginal);
 				bucle: while (o < 7) {
 
 					System.out.println("Q " + modoConexion + " "
@@ -92,10 +85,11 @@ public class dnsclient {
 					if (!(respuesta.getAnswers().isEmpty())) {
 
 						if (respuesta.getAnswers().get(0).getRRType().equals(RRType.CNAME)) {
+							
+							DomainName consulta = ((CNAMEResourceRecord) respuesta.getAnswers().get(0)).getNs();
 							System.out.println(
 									"A " + ServerPregunta.toString().substring(1, ServerPregunta.toString().length())
-											+ " CNAME");
-							DomainName consulta = ((CNAMEResourceRecord) respuesta.getAnswers().get(0)).getNs();
+											+ " CNAME"+" "+consulta.toString());
 							ServerPregunta = noDNS(consulta, ipOriginal, RRType.valueOf(partes[0]), dnsConsultados);
 							if (ServerPregunta == null) {
 								//System.out.println("El campo additonal está vacio");
@@ -164,9 +158,7 @@ public class dnsclient {
 							break;
 						}
 					} else if (respuesta.getAdditonalRecords().isEmpty() && !respuesta.getNameServers().isEmpty()) {
-						// cambiar respeusta de tipo mensaje a tipo domain o string para poder usarlo
-						// tanto en cname como
-						// para la recursividad
+						
 						System.out.println("El campo additonal está vacio");
 						DomainName consulta = ((NSResourceRecord) respuesta.getNameServers().get(0)).getNS();
 						RRType tipo = RRType.A;
@@ -231,14 +223,6 @@ public class dnsclient {
 		String modoConexion = "UDP";
 		ArrayList<String> dnsConsultados = new ArrayList<>();
 		
-		//en caso de que entre con tipo cname hay que resolver la direccion a/aaaa
-		// si entra por no saber la direccion de un ns hay que hacer consulta a/aaa
-		// en caso de entrar como ns solo hay que sacar los autiritos no resolverlos
-		
-		
-		
-		
-		
 		
 		
 siguiente:		for (int o = 0; o < 7; o++) {
@@ -264,10 +248,11 @@ siguiente:		for (int o = 0; o < 7; o++) {
 			}
 			if (!(respuesta.getAnswers().isEmpty())) {
 				if (respuesta.getAnswers().get(0).getRRType().equals(RRType.CNAME)) {
+					DomainName consultas = ((CNAMEResourceRecord) respuesta.getAnswers().get(0)).getNs();
 					System.out.println(
 							"A " + ServerPregunta.toString().substring(1, ServerPregunta.toString().length())
-									+ " CNAME");
-					DomainName consultas = ((CNAMEResourceRecord) respuesta.getAnswers().get(0)).getNs();
+									+ " CNAME"+" "+consultas.toString());
+					
 					ServerPregunta = noDNS(consultas, ipOriginal, tipo, dnsConsultados);
 					if (ServerPregunta == null) {
 						
