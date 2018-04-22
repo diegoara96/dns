@@ -19,9 +19,11 @@ public class EnvioPaquetes {
 
 	// administra tcp/udp posible implementacion de respuestas truncadas cuando sepa
 	// como detectarlas y un ejemplo de ellas
+	
+	//de no ir cambiar la llamada al bloque try de udp
 	public static Message envio(Message consulta, Inet4Address direccion_ip, String modoConexion) {
-		if (modoConexion.equals("UDP")) {
-			return envioUDP(consulta, direccion_ip);
+		if (modoConexion.equals("UDP")) {	
+				return envioUDP(consulta, direccion_ip);
 		} else if (modoConexion.equals("TCP")) {
 			return envioTCP(consulta, direccion_ip);
 		} else {
@@ -67,9 +69,10 @@ public class EnvioPaquetes {
 				// System.out.println("Tiempo de espera excedido,compruebe los datos de
 				// conexión");
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+				socketUDP.close();
+				System.out.println("Respuesta truncada se usará TCP");
+				return envioTCP(consulta, direccion_ip);
+			} 
 			// Cerramos el socket
 			socketUDP.close();
 

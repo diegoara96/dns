@@ -57,12 +57,13 @@ public class dnsclient {
 			}
 
 			partes[0] = partes[0].toUpperCase().trim();
-			if (partes[0].equals("A") || partes[0].equals("NS") || partes[0].equals("AAAA") || partes[0].equals("MX")|| partes[0].equals("CNAME")) {
+			if (partes[0].equals("A") || partes[0].equals("NS") || partes[0].equals("AAAA") || partes[0].equals("MX")
+					|| partes[0].equals("CNAME")) {
 
 				Message inicial = new Message(partes[1], RRType.valueOf(partes[0]), false);
 				int o = 0;
 				ArrayList<String> dnsConsultados = new ArrayList<>();
-				EnvioPaquetes.envioTCP(inicial, ipOriginal);
+
 				// se limita las consultas a 7 por defecto
 				bucle: while (o < 7) {
 
@@ -82,7 +83,8 @@ public class dnsclient {
 
 					if (!(respuesta.getAnswers().isEmpty())) {
 
-						if (respuesta.getAnswers().get(0).getRRType().equals(RRType.CNAME)&&!RRType.valueOf(partes[0]).equals(RRType.CNAME)) {
+						if (respuesta.getAnswers().get(0).getRRType().equals(RRType.CNAME)
+								&& !RRType.valueOf(partes[0]).equals(RRType.CNAME)) {
 
 							DomainName consulta = ((CNAMEResourceRecord) respuesta.getAnswers().get(0)).getNs();
 							System.out.println(
@@ -155,8 +157,8 @@ public class dnsclient {
 						}
 					} else if (respuesta.getAdditonalRecords().isEmpty() && !respuesta.getNameServers().isEmpty()) {
 
-						System.out.println("El campo additonal está vacio");
 						DomainName consulta = ((NSResourceRecord) respuesta.getNameServers().get(0)).getNS();
+						System.out.println("No hay registro tipo A en seccion ADDITIONAL para " + consulta);
 						RRType tipo = RRType.A;
 
 						ServerPregunta = noDNS(consulta, ipOriginal, tipo, dnsConsultados);
@@ -179,7 +181,7 @@ public class dnsclient {
 				}
 
 			} else {
-				System.out.println("type no admitido");
+				System.out.println("type no admitido " + partes[0]);
 				continue;
 			}
 
@@ -217,13 +219,13 @@ public class dnsclient {
 						+ ((MXResourceRecord) (respuesta.getAnswers().get(i))).getNS().toString());
 			}
 		}
-		
-		if((respuesta.getAnswers().get(0)) instanceof CNAMEResourceRecord) {
-			
-		System.out.println(
-				"A " + ServerPregunta.toString().substring(1, ServerPregunta.toString().length())
-						+ " CNAME" + " " + ((CNAMEResourceRecord) respuesta.getAnswers().get(0)).getNs().toString());
-	}}
+
+		if ((respuesta.getAnswers().get(0)) instanceof CNAMEResourceRecord) {
+
+			System.out.println("A " + ServerPregunta.toString().substring(1, ServerPregunta.toString().length())
+					+ " CNAME" + " " + ((CNAMEResourceRecord) respuesta.getAnswers().get(0)).getNs().toString());
+		}
+	}
 
 	public static Inet4Address noDNS(DomainName consulta, Inet4Address ipOriginal, RRType tipo,
 			ArrayList<String> dnsString) {

@@ -39,7 +39,8 @@ public class Message {
     private final List<ResourceRecord> additionalRecords;
     private final MessageOptions options;
 
-    /**
+    
+	/**
      * Constructs a message of the given type
      *
      * @param question The Domain to ask for
@@ -169,7 +170,13 @@ public class Message {
 
         return os.toByteArray();
     }
-
+    /**
+     * 
+     * @return the options
+     */
+    public MessageOptions getOptions() {
+		return options;
+	}
     /**
      * @return the messageId
      */
