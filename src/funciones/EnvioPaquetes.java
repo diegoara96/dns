@@ -66,12 +66,14 @@ public class EnvioPaquetes {
 				respuesta = new Message(respuestaServidor.getData());
 
 			} catch (SocketTimeoutException e) {
-				// System.out.println("Tiempo de espera excedido,compruebe los datos de
-				// conexión");
-			} catch (Exception e) {
+				
+			} catch (ExceptionTruncada e) {
 				socketUDP.close();
 				System.out.println("Respuesta truncada se usará TCP");
 				return envioTCP(consulta, direccion_ip);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			} 
 			// Cerramos el socket
 			socketUDP.close();

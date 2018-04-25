@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import funciones.ExceptionTruncada;
+
 /**
  *
  * @author Miguel Rodriguez Perez
@@ -99,7 +101,7 @@ public class Message {
         buffer = Arrays.copyOfRange(buffer, 2, length);
 
         if (options.getTC()) {
-            throw new Exception("We do not know what to do with truncated responses");
+            throw new ExceptionTruncada("We do not know what to do with truncated responses");
         }
 
         int qcount, acount, nscount, adcount;
