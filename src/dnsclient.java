@@ -4,27 +4,31 @@ import java.io.InputStreamReader;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.HashMap;
 import es.uvigo.det.ro.simpledns.*;
+import funciones.Dominio;
 import funciones.EnvioPaquetes;
 
 public class dnsclient {
+	public static HashMap<String, Dominio> cache = new HashMap<>();
 
 	public static void main(String[] args) throws Exception {
+
 		String modoConexion;
-			
+
 		if (args.length != 2) {
 			System.out.println("numero de argumentos incorrecto");
-		}	
-			
+		}
+
 		args[0] = args[0].toLowerCase();
 		if (!(args[0].equals("-t") || args[0].equals("-u"))) {
 			System.out.println("modo de conexion distinto de -(t|u)");
 			System.exit(1);
-		}	
-			
+		}
+
 		String ipCachos[] = args[1].split("\\.");
 		byte ip[] = new byte[4];
-			
+
 		if (ipCachos.length != 4) {
 			System.out.println("Direcion ip DNS incorrecta");
 			System.exit(1);
@@ -33,7 +37,7 @@ public class dnsclient {
 
 			byte b = (byte) Integer.parseInt(ipCachos[i]);
 			ip[i] = (byte) (b & 0xFF);
-			
+
 		}
 
 		BufferedReader algo = new BufferedReader(new InputStreamReader(System.in));
@@ -63,6 +67,16 @@ public class dnsclient {
 				Message inicial = new Message(partes[1], RRType.valueOf(partes[0]), false);
 				int o = 0;
 				ArrayList<String> dnsConsultados = new ArrayList<>();
+
+				System.out.println("Q " + "CACHE" + " " + "CACHE" + " " + inicial.getQuestionType() + " " + partes[1]);
+
+				if (cache.containsKey(inicial.getQuestion().toString())
+						&& cache.get(inicial.getQuestion().toString()).rtype(RRType.valueOf(partes[0]))) {
+					Dominio.answerCache(cache.get(inicial.getQuestion().toString()), RRType.valueOf(partes[0]));
+					continue siguiente;
+				} else {
+					System.out.println("La cache no tiene la respuesta");
+				}
 
 				// se limita las consultas a 7 por defecto
 				bucle: while (o < 7) {
@@ -96,9 +110,8 @@ public class dnsclient {
 								continue siguiente;
 							}
 
-						}
-
-						answer(respuesta, ServerPregunta);
+						} else
+							answer(respuesta, ServerPregunta);
 
 						break;
 					} else if (!respuesta.getNameServers().isEmpty()
@@ -158,12 +171,10 @@ public class dnsclient {
 					} else if (respuesta.getAdditonalRecords().isEmpty() && !respuesta.getNameServers().isEmpty()) {
 
 						DomainName consulta = ((NSResourceRecord) respuesta.getNameServers().get(0)).getNS();
-						System.out.println("A "
-								+ ServerPregunta.toString().substring(1,
-										ServerPregunta.toString().length())
-								+ " " + respuesta.getNameServers().get(0).getRRType() + " "
-								+ respuesta.getNameServers().get(0).getTTL() + " "
-								+ consulta);
+						System.out.println(
+								"A " + ServerPregunta.toString().substring(1, ServerPregunta.toString().length()) + " "
+										+ respuesta.getNameServers().get(0).getRRType() + " "
+										+ respuesta.getNameServers().get(0).getTTL() + " " + consulta);
 						System.out.println("No hay registro tipo A en seccion ADDITIONAL para " + consulta);
 						RRType tipo = RRType.A;
 
@@ -201,6 +212,17 @@ public class dnsclient {
 					+ respuesta.getAnswers().get(0).getTTL() + " "
 					+ ((AResourceRecord) (respuesta.getAnswers().get(0))).getAddress().toString().substring(1,
 							((AResourceRecord) (respuesta.getAnswers().get(0))).getAddress().toString().length()));
+
+			if (!cache.containsKey(respuesta.getQuestion().toString())) {
+				cache.put(respuesta.getQuestion().toString(),
+						new Dominio(((AResourceRecord) (respuesta.getAnswers().get(0))).getAddress(),
+								respuesta.getAnswers().get(0).getTTL()));
+
+			} else {
+				cache.get(respuesta.getQuestion().toString())
+						.setIp(((AResourceRecord) (respuesta.getAnswers().get(0))).getAddress());
+			}
+
 		}
 		if ((respuesta.getAnswers().get(0)) instanceof NSResourceRecord) {
 			for (int i = 0; i < respuesta.getAnswers().size(); i++) {
@@ -210,6 +232,15 @@ public class dnsclient {
 						+ ((NSResourceRecord) (respuesta.getAnswers().get(i))).getNS().toString().substring(1,
 								(((NSResourceRecord) (respuesta.getAnswers().get(i))).getNS().toString().length())));
 			}
+
+			if (!cache.containsKey(respuesta.getQuestion().toString())) {
+				cache.put(respuesta.getQuestion().toString(),
+						new Dominio(respuesta.getAnswers(), respuesta.getQuestionType()));
+
+			} else {
+				cache.get(respuesta.getQuestion().toString()).setServerNS(respuesta.getAnswers());
+			}
+
 		}
 
 		if ((respuesta.getAnswers().get(0)) instanceof AAAAResourceRecord) {
@@ -217,6 +248,17 @@ public class dnsclient {
 					+ respuesta.getAnswers().get(0).getTTL() + " "
 					+ ((AAAAResourceRecord) (respuesta.getAnswers().get(0))).getAddress().toString().substring(1,
 							((AAAAResourceRecord) (respuesta.getAnswers().get(0))).getAddress().toString().length()));
+
+			if (!cache.containsKey(respuesta.getQuestion().toString())) {
+				cache.put(respuesta.getQuestion().toString(),
+						new Dominio(((AAAAResourceRecord) (respuesta.getAnswers().get(0))).getAddress(),
+								respuesta.getAnswers().get(0).getTTL()));
+
+			} else {
+				cache.get(respuesta.getQuestion().toString())
+						.setIpv6(((AAAAResourceRecord) (respuesta.getAnswers().get(0))).getAddress());
+			}
+
 		}
 		if ((respuesta.getAnswers().get(0)) instanceof MXResourceRecord) {
 			for (int i = 0; i < respuesta.getAnswers().size(); i++) {
@@ -224,17 +266,33 @@ public class dnsclient {
 						+ " " + respuesta.getAnswers().get(i).getTTL() + " "
 						+ ((MXResourceRecord) (respuesta.getAnswers().get(i))).getNS().toString());
 			}
+			if (!cache.containsKey(respuesta.getQuestion().toString())) {
+				cache.put(respuesta.getQuestion().toString(),
+						new Dominio(respuesta.getAnswers(), respuesta.getQuestionType()));
+
+			} else {
+				cache.get(respuesta.getQuestion().toString()).setServerMX(respuesta.getAnswers());
+			}
 		}
 
 		if ((respuesta.getAnswers().get(0)) instanceof CNAMEResourceRecord) {
 
 			System.out.println("A " + ServerPregunta.toString().substring(1, ServerPregunta.toString().length())
 					+ " CNAME" + " " + ((CNAMEResourceRecord) respuesta.getAnswers().get(0)).getNs().toString());
+			if (!cache.containsKey(respuesta.getQuestion().toString())) {
+				cache.put(respuesta.getQuestion().toString(),
+						new Dominio(((CNAMEResourceRecord) respuesta.getAnswers().get(0)).getNs(),
+								respuesta.getAnswers().get(0).getTTL()));
+
+			} else {
+				cache.get(respuesta.getQuestion().toString())
+						.setAlias(((CNAMEResourceRecord) respuesta.getAnswers().get(0)).getNs());
+			}
 		}
+
 	}
 
-	public static Inet4Address noDNS(DomainName consulta, Inet4Address ipOriginal, RRType tipo
-			) {
+	public static Inet4Address noDNS(DomainName consulta, Inet4Address ipOriginal, RRType tipo) {
 		int contador = 0;
 		Message respuesta = null;
 		Message dns = new Message(consulta, tipo, false);
@@ -244,9 +302,9 @@ public class dnsclient {
 		ArrayList<String> dnsConsultados = new ArrayList<>();
 
 		siguiente: for (int o = 0; o < 7; o++) {
-if(ServerPregunta==null) {
-	return null;
-}
+			if (ServerPregunta == null) {
+				return null;
+			}
 			System.out.println("Q " + modoConexion + " "
 					+ ServerPregunta.toString().substring(1, ServerPregunta.toString().length()) + " " + tipo + " "
 					+ consulta.toString());
@@ -257,7 +315,7 @@ if(ServerPregunta==null) {
 			} while (respuesta == null && contador < 3);
 			if (respuesta == null) {
 				System.out.println("No hay respuesta del servidor consultado");
-				//System.exit(1);
+				// System.exit(1);
 				return null;
 			}
 			if (!respuesta.getNameServers().isEmpty()) {
@@ -281,7 +339,7 @@ if(ServerPregunta==null) {
 
 					// break;
 				} else {
-					answer(respuesta, ipOriginal);
+					answer(respuesta, ServerPregunta);
 					if (tipo.equals(RRType.A)) {
 						ip = ((AResourceRecord) (respuesta.getAnswers().get(0))).getAddress();
 
@@ -345,8 +403,9 @@ if(ServerPregunta==null) {
 
 			else if (respuesta.getAdditonalRecords().isEmpty() && !respuesta.getNameServers().isEmpty()) {
 
-				ServerPregunta = noDNS(((NSResourceRecord) respuesta.getNameServers().get(0)).getNS(), ipOriginal, tipo);
-
+				ServerPregunta = noDNS(((NSResourceRecord) respuesta.getNameServers().get(0)).getNS(), ipOriginal,
+						tipo);
+				
 				continue;
 			}
 
