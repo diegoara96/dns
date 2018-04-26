@@ -9,7 +9,6 @@ public class MXResourceRecord extends ResourceRecord {
 	        super(decoded);
 	        byte  buffer[];
 	        buffer = Arrays.copyOfRange(getRRData(), 2, getRRData().length);
-
 	        ns = new DomainName(buffer, message);
 	    }
 

@@ -110,7 +110,6 @@ public class EnvioPaquetes {
 			byte longitud[] = Utils.int16toByteArray(mensaje.length);
 			os.write(longitud);
 			os.write(mensaje);
-
 			salidabytes.write(os.toByteArray());
 			ByteArrayOutputStream al = new ByteArrayOutputStream();
 			int longTotal = entradaBytes.readUnsignedShort();

@@ -104,7 +104,7 @@ public class dnsclient {
 							System.out.println(
 									"A " + ServerPregunta.toString().substring(1, ServerPregunta.toString().length())
 											+ " CNAME" + " " + consulta.toString());
-							ServerPregunta = noDNS(consulta, ipOriginal, RRType.valueOf(partes[0]));
+							ServerPregunta = noDNS(consulta, ipOriginal, RRType.valueOf(partes[0]),modoConexion);
 							if (ServerPregunta == null) {
 
 								continue siguiente;
@@ -178,7 +178,7 @@ public class dnsclient {
 						System.out.println("No hay registro tipo A en seccion ADDITIONAL para " + consulta);
 						RRType tipo = RRType.A;
 
-						ServerPregunta = noDNS(consulta, ipOriginal, tipo);
+						ServerPregunta = noDNS(consulta, ipOriginal, tipo,modoConexion);
 
 						if (ServerPregunta == null) {
 							System.out.println("El campo additonal está vacio");
@@ -292,13 +292,13 @@ public class dnsclient {
 
 	}
 
-	public static Inet4Address noDNS(DomainName consulta, Inet4Address ipOriginal, RRType tipo) {
+	public static Inet4Address noDNS(DomainName consulta, Inet4Address ipOriginal, RRType tipo,String modoConexion) {
 		int contador = 0;
 		Message respuesta = null;
 		Message dns = new Message(consulta, tipo, false);
 		Inet4Address ServerPregunta = ipOriginal;
 		Inet4Address ip = null;
-		String modoConexion = "UDP";
+		
 		ArrayList<String> dnsConsultados = new ArrayList<>();
 
 		siguiente: for (int o = 0; o < 7; o++) {
@@ -331,7 +331,7 @@ public class dnsclient {
 					System.out.println("A " + ServerPregunta.toString().substring(1, ServerPregunta.toString().length())
 							+ " CNAME" + " " + consultas.toString());
 
-					ServerPregunta = noDNS(consultas, ipOriginal, tipo);
+					ServerPregunta = noDNS(consultas, ipOriginal, tipo,modoConexion);
 					if (ServerPregunta == null) {
 
 						continue siguiente;
@@ -393,7 +393,7 @@ public class dnsclient {
 							}
 						}
 					}
-					// if(a==true)break;
+					
 				}
 				if (a == false) {
 					System.out.println("no se ha encontrado un dns valido");
@@ -404,9 +404,13 @@ public class dnsclient {
 			else if (respuesta.getAdditonalRecords().isEmpty() && !respuesta.getNameServers().isEmpty()) {
 
 				ServerPregunta = noDNS(((NSResourceRecord) respuesta.getNameServers().get(0)).getNS(), ipOriginal,
-						tipo);
+						tipo,modoConexion);
 				
 				continue;
+			}
+			else {
+				System.out.println("No hay respuesta");
+				return null;
 			}
 
 		}

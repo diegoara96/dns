@@ -18,39 +18,38 @@ public class Dominio {
 	private Inet4Address ip;
 	private Inet6Address ipv6;
 	private int TTL;
-	
-	
-public Dominio() {
-	this.serverNS= new ArrayList<>();
-	this.serverMX= new ArrayList<>();
-}
+
+	public Dominio() {
+		this.serverNS = new ArrayList<>();
+		this.serverMX = new ArrayList<>();
+	}
 	// contructor para ipv4
-	public Dominio(Inet4Address ip,int TTL) {
+	public Dominio(Inet4Address ip, int TTL) {
 		this();
 		this.ip = ip;
-		this.TTL=TTL;
-		
+		this.TTL = TTL;
+
 	}
 
 	// contructor para ipv6
-	public Dominio(Inet6Address ipv6,int TTL) {
+	public Dominio(Inet6Address ipv6, int TTL) {
 		this();
 		this.ipv6 = ipv6;
-		this.TTL=TTL;
+		this.TTL = TTL;
 	}
 
-	public Dominio(DomainName alias,int TTL) {
+	public Dominio(DomainName alias, int TTL) {
 		this();
 		this.alias = alias;
-		this.TTL=TTL;
+		this.TTL = TTL;
 	}
 
-	public Dominio(List<ResourceRecord> server, RRType tipo){
+	public Dominio(List<ResourceRecord> server, RRType tipo) {
 		this();
 		if (tipo.equals(RRType.NS)) {
-			this.serverNS=server;
+			this.serverNS = server;
 		} else {
-			this.serverMX=server;
+			this.serverMX = server;
 		}
 	}
 
@@ -65,31 +64,30 @@ public Dominio() {
 			return null;
 		}
 	}
-	
-public List<ResourceRecord> listas(RRType tipo){
-	switch (tipo) {
-	case NS:
-		return serverNS;
-	case MX:
-		return serverMX;
-	default:
-		return null;
+
+	public List<ResourceRecord> listas(RRType tipo) {
+		switch (tipo) {
+		case NS:
+			return serverNS;
+		case MX:
+			return serverMX;
+		default:
+			return null;
+		}
 	}
-}
-	
 
 	public static void answerCache(Dominio respuesta, RRType tipo) {
 		if (tipo.equals(RRType.A)) {
 			System.out.println("A " + "CACHE" + " " + respuesta.getTTL() + " "
 					+ respuesta.getAddress(tipo).toString().substring(1));
 		}
-		
+
 		if (tipo.equals(RRType.NS)) {
 			for (int i = 0; i < respuesta.serverNS.size(); i++) {
 
 				System.out.println("A " + "CACHE" + " " + respuesta.serverNS.get(i).getTTL() + " "
 						+ ((NSResourceRecord) (respuesta.serverNS.get(i))).getNS().toString());
-								
+
 			}
 		}
 
@@ -97,7 +95,7 @@ public List<ResourceRecord> listas(RRType tipo){
 			System.out.println("A " + "CACHE" + " " + respuesta.getTTL() + " "
 					+ respuesta.getAddress(tipo).toString().substring(1));
 		}
-		
+
 		if (tipo.equals(RRType.MX)) {
 			for (int i = 0; i < respuesta.serverMX.size(); i++) {
 				System.out.println("A " + "CACHE" + " " + respuesta.serverMX.get(i).getTTL() + " "
@@ -107,13 +105,12 @@ public List<ResourceRecord> listas(RRType tipo){
 
 		if (tipo.equals(RRType.CNAME)) {
 
-			System.out.println("A " + "CACHE" + " CNAME" + " "
-					+ respuesta.alias);
+			System.out.println("A " + "CACHE" + " CNAME" + " " + respuesta.alias);
 		}
 	}
 
 	public void setServerNS(List<ResourceRecord> serverNS) {
-		
+
 		this.serverNS = serverNS;
 	}
 
@@ -152,6 +149,7 @@ public List<ResourceRecord> listas(RRType tipo){
 	public int getTTL() {
 		return TTL;
 	}
+
 	public DomainName getAlias() {
 		return alias;
 	}
@@ -159,24 +157,20 @@ public List<ResourceRecord> listas(RRType tipo){
 	public void setAlias(DomainName alias) {
 		this.alias = alias;
 	}
+
 	public boolean rtype(RRType tipo) {
-		if(tipo.equals(RRType.NS)&&!serverNS.isEmpty()) {
+		if (tipo.equals(RRType.NS) && !serverNS.isEmpty()) {
 			return true;
-		}
-		else if(tipo.equals(RRType.MX)&&!serverMX.isEmpty()) {
+		} else if (tipo.equals(RRType.MX) && !serverMX.isEmpty()) {
 			return true;
-		}
-		else if(tipo.equals(RRType.A)&&ip!=null) {
+		} else if (tipo.equals(RRType.A) && ip != null) {
 			return true;
-		}
-		else if(tipo.equals(RRType.AAAA)&&ipv6!=null) {
+		} else if (tipo.equals(RRType.AAAA) && ipv6 != null) {
 			return true;
-		}
-		else if(tipo.equals(RRType.CNAME)&&alias!=null) {
+		} else if (tipo.equals(RRType.CNAME) && alias != null) {
 			return true;
-		}
-		else return false;
+		} else
+			return false;
 	}
-	
 
 }
