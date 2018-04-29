@@ -62,7 +62,7 @@ public class dnsclient {
 
 			partes[0] = partes[0].toUpperCase().trim();
 			if (partes[0].equals("A") || partes[0].equals("NS") || partes[0].equals("AAAA") || partes[0].equals("MX")
-					|| partes[0].equals("CNAME")) {
+					|| partes[0].equals("CNAME")|| partes[0].equals("TXT")) {
 
 				Message inicial = new Message(partes[1], RRType.valueOf(partes[0]), false);
 				int o = 0;
@@ -224,6 +224,10 @@ public class dnsclient {
 			}
 
 		}
+		if ((respuesta.getAnswers().get(0)) instanceof TXTResourceRecord) {
+			System.out.println("A " + ServerPregunta.toString().substring(1, ServerPregunta.toString().length()) + " "
+					+ respuesta.getAnswers().get(0).getTTL() +" "+((TXTResourceRecord)respuesta.getAnswers().get(0)).gettxt());
+		}
 		if ((respuesta.getAnswers().get(0)) instanceof NSResourceRecord) {
 			for (int i = 0; i < respuesta.getAnswers().size(); i++) {
 
@@ -242,6 +246,8 @@ public class dnsclient {
 			}
 
 		}
+		
+		
 
 		if ((respuesta.getAnswers().get(0)) instanceof AAAAResourceRecord) {
 			System.out.println("A " + ServerPregunta.toString().substring(1, ServerPregunta.toString().length()) + " "

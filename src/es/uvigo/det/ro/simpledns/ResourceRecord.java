@@ -50,6 +50,8 @@ public class ResourceRecord {
             	return new CNAMEResourceRecord(temp, message);
             case MX:
             	return new MXResourceRecord(temp, message);
+            case TXT:
+            	return new TXTResourceRecord(temp, message);
             default:
                 return temp;
         }
