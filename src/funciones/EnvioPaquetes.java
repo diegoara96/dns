@@ -18,18 +18,28 @@ import es.uvigo.det.ro.simpledns.*;
 
 public class EnvioPaquetes {
 
-	// administra tcp/udp posible implementacion de respuestas truncadas cuando sepa
-	// como detectarlas y un ejemplo de ellas
-	
-	//de no ir cambiar la llamada al bloque try de udp
+	/**
+	 * funcion que administra el tipo de conexion, en caso de respuests truncada cambia de udp a tcp
+	 * @param consulta
+	 * @param direccion_ip
+	 * @param modoConexion
+	 * @return
+	 */
 	public static Message envio(Message consulta, Inet4Address direccion_ip, String modoConexion) {
 		if (modoConexion.equals("UDP")) {
 			try {
-				return envioUDP(consulta, direccion_ip);
+				int contador=0;
+				Message respuesta;
+				do {
+					contador++;
+					respuesta=envioUDP(consulta, direccion_ip);
+					
+				}while(contador<3&&respuesta==null);
+				return respuesta;
 			}catch(ExceptionTruncada e) {
 				return envioTCP(consulta, direccion_ip);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 				return null;
 			}
@@ -40,7 +50,13 @@ public class EnvioPaquetes {
 		}
 	}
 
-	// envia udp
+	/**
+	 * envia un mensaje a un servidor dns usando UDP
+	 * @param consulta
+	 * @param direccion_ip
+	 * @return Message
+	 * @throws Exception
+	 */
 	public static Message envioUDP(Message consulta, Inet4Address direccion_ip)throws Exception {
 
 		int puerto = 53;
@@ -82,26 +98,32 @@ public class EnvioPaquetes {
 			socketUDP.close();
 
 		} catch (SocketException e1) {
-			// TODO Auto-generated catch block
+			 
 			e1.printStackTrace();
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
+			 
 			e1.printStackTrace();
 		}
 
 		return respuesta;
 	}
 
-	// envia tcp
+	/**
+	 * envia un mensaje a un servidor dns usando TCP
+	 * @param consulta
+	 * @param direccion_ip
+	 * @return Message
+	 */
 	public static Message envioTCP(Message consulta, Inet4Address direccion_ip) {
 		int puerto = 53;
 		Message respuesta = null;
 		try {
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
-			// creamos el socket TCP
+			// creamos el socket TCP vacio
 
 			Socket socketCliente = new Socket();
 			socketCliente.setSoTimeout(1000);
+			//conectamos el socket al servidor, asi si no conecta sale antes que con la excepcion del connect exception
 			socketCliente.connect(new InetSocketAddress(direccion_ip, puerto), 3000);
 
 			InputStream entrada = socketCliente.getInputStream();
@@ -137,10 +159,10 @@ public class EnvioPaquetes {
 			System.out.println("El servidor rechaza TCP");
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			 
 			e.printStackTrace();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			 
 			e.printStackTrace();
 		}
 		return respuesta;
