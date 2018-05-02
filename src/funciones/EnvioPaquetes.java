@@ -10,6 +10,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
@@ -99,7 +100,9 @@ public class EnvioPaquetes {
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
 			// creamos el socket TCP
 
-			Socket socketCliente = new Socket(direccion_ip, puerto);
+			Socket socketCliente = new Socket();
+			socketCliente.setSoTimeout(1000);
+			socketCliente.connect(new InetSocketAddress(direccion_ip, puerto), 3000);
 
 			InputStream entrada = socketCliente.getInputStream();
 
@@ -124,6 +127,10 @@ public class EnvioPaquetes {
 			respuesta = new Message(al.toByteArray());
 
 			socketCliente.close();
+
+		}catch (SocketTimeoutException e) {
+			
+			return null;
 
 		} catch (ConnectException e) {
 			
