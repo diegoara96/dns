@@ -22,8 +22,16 @@ public class EnvioPaquetes {
 	
 	//de no ir cambiar la llamada al bloque try de udp
 	public static Message envio(Message consulta, Inet4Address direccion_ip, String modoConexion) {
-		if (modoConexion.equals("UDP")) {	
+		if (modoConexion.equals("UDP")) {
+			try {
 				return envioUDP(consulta, direccion_ip);
+			}catch(ExceptionTruncada e) {
+				return envioTCP(consulta, direccion_ip);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return null;
+			}
 		} else if (modoConexion.equals("TCP")) {
 			return envioTCP(consulta, direccion_ip);
 		} else {
@@ -32,7 +40,7 @@ public class EnvioPaquetes {
 	}
 
 	// envia udp
-	public static Message envioUDP(Message consulta, Inet4Address direccion_ip) {
+	public static Message envioUDP(Message consulta, Inet4Address direccion_ip)throws Exception {
 
 		int puerto = 53;
 
@@ -67,13 +75,7 @@ public class EnvioPaquetes {
 
 			} catch (SocketTimeoutException e) {
 				
-			} catch (ExceptionTruncada e) {
-				socketUDP.close();
-				System.out.println("Respuesta truncada se usará TCP");
-				return envioTCP(consulta, direccion_ip);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			
 			} 
 			// Cerramos el socket
 			socketUDP.close();
