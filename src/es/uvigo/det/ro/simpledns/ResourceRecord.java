@@ -52,6 +52,8 @@ public class ResourceRecord {
             	return new MXResourceRecord(temp, message);
             case TXT:
             	return new TXTResourceRecord(temp, message);
+            case PTR:
+            	return new PTRResourceRecord(temp, message);
             default:
                 return temp;
         }

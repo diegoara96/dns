@@ -68,9 +68,11 @@ public class dnsclient {
 				}
 
 				partes[0] = partes[0].toUpperCase().trim();
-				if (partes[0].equals("A") || partes[0].equals("NS") || partes[0].equals("AAAA")
+				if (partes[0].equals("A") || partes[0].equals("NS") || partes[0].equals("AAAA")|| partes[0].equals("PTR")
 						|| partes[0].equals("MX") || partes[0].equals("CNAME") || partes[0].equals("TXT")) {
-
+					if(RRType.valueOf(partes[0]).equals(RRType.PTR)) {
+						partes[1]=partes[1].trim().concat(".in-addr.arpa.");
+					}
 					Message inicial = new Message(partes[1], RRType.valueOf(partes[0]), false);
 					int o = 0;
 					ArrayList<String> dnsConsultados = new ArrayList<>();
@@ -88,7 +90,7 @@ public class dnsclient {
 
 					// se limita las consultas a 7 por defecto
 					bucle: while (o < 7) {
-
+						
 						System.out.println("Q " + modoConexion + " "
 								+ ServerPregunta.toString().substring(1, ServerPregunta.toString().length()) + " "
 								+ inicial.getQuestionType() + " " + partes[1]);
@@ -249,6 +251,8 @@ public class dnsclient {
 						+ ((NSResourceRecord) (respuesta.getAnswers().get(i))).getNS().toString().substring(1,
 								(((NSResourceRecord) (respuesta.getAnswers().get(i))).getNS().toString().length())));
 			}
+			
+			
 
 			if (!cache.containsKey(respuesta.getQuestion().toString())) {
 				cache.put(respuesta.getQuestion().toString(),
@@ -259,7 +263,13 @@ public class dnsclient {
 			}
 
 		}
-
+		if ((respuesta.getAnswers().get(0)) instanceof PTRResourceRecord) {
+			
+				System.out.println("A " + ServerPregunta.toString().substring(1, ServerPregunta.toString().length())
+						+ " " + respuesta.getAnswers().get(0).getTTL() + " "
+						+ ((PTRResourceRecord) (respuesta.getAnswers().get(0))).getPtr().toString().substring(1));
+			}
+		
 		if ((respuesta.getAnswers().get(0)) instanceof AAAAResourceRecord) {
 			System.out.println("A " + ServerPregunta.toString().substring(1, ServerPregunta.toString().length()) + " "
 					+ respuesta.getAnswers().get(0).getTTL() + " "
