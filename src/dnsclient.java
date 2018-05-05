@@ -70,8 +70,10 @@ public class dnsclient {
 				partes[0] = partes[0].toUpperCase().trim();
 				if (partes[0].equals("A") || partes[0].equals("NS") || partes[0].equals("AAAA")|| partes[0].equals("PTR")
 						|| partes[0].equals("MX") || partes[0].equals("CNAME") || partes[0].equals("TXT")) {
-					if(RRType.valueOf(partes[0]).equals(RRType.PTR)) {
-						partes[1]=partes[1].trim().concat(".in-addr.arpa.");
+					if(RRType.valueOf(partes[0]).equals(RRType.PTR)&&partes[1].contains(".i")) {
+					String cachos[]=partes[1].split("\\.");
+					partes[1]=cachos[0].concat(".").concat(cachos[1]).concat(".").concat(cachos[2]).concat(".").concat(cachos[3]).concat(".in-addr.arpa.");
+						
 					}
 					Message inicial = new Message(partes[1], RRType.valueOf(partes[0]), false);
 					int o = 0;
