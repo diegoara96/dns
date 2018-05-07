@@ -224,11 +224,11 @@ public class dnsclient {
 
 	public static void answer(Message respuesta, Inet4Address ServerPregunta) {
 		if ((respuesta.getAnswers().get(0)) instanceof AResourceRecord) {
-			System.out.println("A " + ServerPregunta.toString().substring(1, ServerPregunta.toString().length()) + " "
-					+ respuesta.getAnswers().get(0).getTTL() + " "
-					+ ((AResourceRecord) (respuesta.getAnswers().get(0))).getAddress().toString().substring(1,
-							((AResourceRecord) (respuesta.getAnswers().get(0))).getAddress().toString().length()));
-
+			for (int i = 0; i < respuesta.getAnswers().size(); i++) {
+			System.out.println("A " + ServerPregunta.toString().substring(1) + " "
+					+ respuesta.getAnswers().get(i).getTTL() + " "
+					+ ((AResourceRecord) (respuesta.getAnswers().get(i))).getAddress().toString().substring(1));
+			}
 			if (!cache.containsKey(respuesta.getQuestion().toString())) {
 				cache.put(respuesta.getQuestion().toString(),
 						new Dominio(((AResourceRecord) (respuesta.getAnswers().get(0))).getAddress(),
@@ -241,9 +241,11 @@ public class dnsclient {
 
 		}
 		if ((respuesta.getAnswers().get(0)) instanceof TXTResourceRecord) {
-			System.out.println("A " + ServerPregunta.toString().substring(1, ServerPregunta.toString().length()) + " "
-					+ respuesta.getAnswers().get(0).getTTL() + " "
-					+ ((TXTResourceRecord) respuesta.getAnswers().get(0)).gettxt());
+			for (int i = 0; i < respuesta.getAnswers().size(); i++) {
+			System.out.println("A " + ServerPregunta.toString().substring(1) + " "
+					+ respuesta.getAnswers().get(i).getTTL() + " "
+					+ ((TXTResourceRecord) respuesta.getAnswers().get(i)).gettxt());
+		}
 		}
 		if ((respuesta.getAnswers().get(0)) instanceof NSResourceRecord) {
 			for (int i = 0; i < respuesta.getAnswers().size(); i++) {
@@ -266,18 +268,18 @@ public class dnsclient {
 
 		}
 		if ((respuesta.getAnswers().get(0)) instanceof PTRResourceRecord) {
-			
-				System.out.println("A " + ServerPregunta.toString().substring(1, ServerPregunta.toString().length())
+			for (int i = 0; i < respuesta.getAnswers().size(); i++) {
+				System.out.println("A " + ServerPregunta.toString().substring(i)
 						+ " " + respuesta.getAnswers().get(0).getTTL() + " "
-						+ ((PTRResourceRecord) (respuesta.getAnswers().get(0))).getPtr().toString().substring(1));
-			}
+						+ ((PTRResourceRecord) (respuesta.getAnswers().get(i))).getPtr().toString().substring(1));
+			}}
 		
 		if ((respuesta.getAnswers().get(0)) instanceof AAAAResourceRecord) {
-			System.out.println("A " + ServerPregunta.toString().substring(1, ServerPregunta.toString().length()) + " "
+			for (int i = 0; i < respuesta.getAnswers().size(); i++) {
+			System.out.println("A " + ServerPregunta.toString().substring(1) + " "
 					+ respuesta.getAnswers().get(0).getTTL() + " "
-					+ ((AAAAResourceRecord) (respuesta.getAnswers().get(0))).getAddress().toString().substring(1,
-							((AAAAResourceRecord) (respuesta.getAnswers().get(0))).getAddress().toString().length()));
-
+					+ ((AAAAResourceRecord) (respuesta.getAnswers().get(i))).getAddress().toString().substring(1));
+			}
 			if (!cache.containsKey(respuesta.getQuestion().toString())) {
 				cache.put(respuesta.getQuestion().toString(),
 						new Dominio(((AAAAResourceRecord) (respuesta.getAnswers().get(0))).getAddress(),
@@ -305,9 +307,10 @@ public class dnsclient {
 		}
 
 		if ((respuesta.getAnswers().get(0)) instanceof CNAMEResourceRecord) {
-
-			System.out.println("A " + ServerPregunta.toString().substring(1, ServerPregunta.toString().length())
-					+ " CNAME" + " " + ((CNAMEResourceRecord) respuesta.getAnswers().get(0)).getNs().toString());
+			for (int i = 0; i < respuesta.getAnswers().size(); i++) {
+			System.out.println("A " + ServerPregunta.toString().substring(1)
+					+ " CNAME" + " " + ((CNAMEResourceRecord) respuesta.getAnswers().get(i)).getNs().toString());
+			}
 			if (!cache.containsKey(respuesta.getQuestion().toString())) {
 				cache.put(respuesta.getQuestion().toString(),
 						new Dominio(((CNAMEResourceRecord) respuesta.getAnswers().get(0)).getNs(),
