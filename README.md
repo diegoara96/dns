@@ -89,7 +89,7 @@ A /162.159.7.226 1800 ne.one.one.one.<br>
 
 ## Authors
 
-* **Diego Araujo ** - *Initial work* - [diegoara96](https://github.com/diegoara96)
+* **Diego Araujo ** - *Diseñador y Desarrollador* - [diegoara96](https://github.com/diegoara96)
 
 ## License
 
