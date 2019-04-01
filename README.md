@@ -94,3 +94,6 @@ A /162.159.7.226 1800 ne.one.one.one.<br>
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+
+# Librerías externas
+Este programa se basa en la librería <a href="https://github.com/RedesdeOrdenadores/LibDNSClient">LibDNSClient</a> desarrollada por <a href="https://github.com/migrax">Miguel Rodríguez</a> (DET de la Universidade de Vigo), ofrecida bajo licencia GNU GPL v3.
