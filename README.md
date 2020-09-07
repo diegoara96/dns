@@ -7,7 +7,7 @@ Se trata de una aplicación que actua como servidor dns cuya entrada será el ti
 ### Iniciar
 
 ```bash
-java -t 198.41.0.4
+java dnsclient -t 198.41.0.4
 ```
 
 ```java
